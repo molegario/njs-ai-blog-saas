@@ -1,3 +1,4 @@
+export const POSTS_PREFETCH_LIMIT = 5;
 import { getSession } from "@auth0/nextjs-auth0"
 import clientPromise from "../lib/mongodb";
 
@@ -20,9 +21,11 @@ export const getAppProps = async (ctx) => {
 
   const posts = await db.collection('posts').find({
     userId: user._id
-  }).sort({
+  })
+  .sort({
     created: -1
-  }).toArray();
+  }).limit(POSTS_PREFETCH_LIMIT)
+  .toArray();
 
   return {
     tokens: user.availableTokens,

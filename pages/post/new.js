@@ -13,10 +13,6 @@ export default function NewPost({}) {
   const [keywords, setKeywords] = useState('');
   const [generating, setGenerating] = useState();
 
-
-
-
-
   async function generateSubmitHandler(evt) {
     evt.preventDefault();
     setGenerating(true);
@@ -72,6 +68,8 @@ export default function NewPost({}) {
                 className="resize-none border border-slate-500 w-full block mt-1 mb-1 px-4 py-2 round-sm"
                 value={topic} 
                 onChange={e => setTopic(e.target.value)}
+                maxLength={150}
+                required
               />
             </div>
             <div>
@@ -85,12 +83,14 @@ export default function NewPost({}) {
                 className="resize-none border border-slate-500 w-full block mt-1 mb-1 px-4 py-2 round-sm" 
                 value={keywords} 
                 onChange={e => setKeywords(e.target.value)} 
+                maxLength={150}
+                required
               />
               <small className="block mb-2">
                 Separate keywords with a comma
               </small>
             </div>
-            <button type="submit" className="btn">Generate</button>
+            <button type="submit" className="btn" disabled={!keywords.trim() || !topic.trim()}>Generate</button>
           </form>
         </div>
       )
@@ -106,6 +106,16 @@ NewPost.getLayout = function getLayout(page, pageProps) {
 export const getServerSideProps = withPageAuthRequired({
   async getServerSideProps(ctx) {
     const appsideprops = await getAppProps(ctx);
+
+    if(!appsideprops.tokens) {
+      return {
+        redirect: {
+          destination: '/token-topup',
+          permanent: false,
+        }
+      }
+    }
+
     return {
       props: {
         ...appsideprops

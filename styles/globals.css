@@ -53,4 +53,8 @@
   .btn {
     @apply hover:no-underline bg-green-500 tracking-wider w-full text-sm text-center text-white font-bold cursor-pointer uppercase px-4 py-2 rounded-sm hover:bg-green-600 transition-colors flex justify-center pt-3 pb-2
   }
+
+  .btn:disabled {
+    @apply bg-green-200 disabled:cursor-not-allowed
+  }
 }

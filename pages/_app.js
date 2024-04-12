@@ -3,6 +3,7 @@ import '../styles/globals.css'
 import { UserProvider } from '@auth0/nextjs-auth0/client'
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import {config} from '@fortawesome/fontawesome-svg-core';
+import { PostsContextProvider } from '../context/posts-context';
 
 config.autoAddCss = false;
 
@@ -21,11 +22,13 @@ const dmSerifDisplay = Archivo_Black({
 function MyApp({ Component, pageProps }) {
   const getLayout = Component.getLayout || ((page)=>page)
   return <UserProvider>
-    <main className={`${dmSans.variable} ${dmSerifDisplay.variable} font-body`}>
-      {
-        getLayout(<Component {...pageProps} />, pageProps)
-      }
-    </main>
+    <PostsContextProvider>
+      <main className={`${dmSans.variable} ${dmSerifDisplay.variable} font-body`}>
+        {
+          getLayout(<Component {...pageProps} />, pageProps)
+        }
+      </main>
+    </PostsContextProvider>
   </UserProvider>
 }
 export default MyApp

@@ -27,6 +27,16 @@ export default withApiAuthRequired (async function handler(req, res) {
       keywords
     } = req.body;
 
+    if(!topic || !keywords) {
+      res.status(422);
+      return;
+    }
+
+    if(topic.length > 150 || keywords.length > 150) {
+      res.status(422);
+      return;
+    }
+
     const config = new Configuration({
       apiKey: process.env.OPENAI_API_KEY
     })
@@ -42,14 +52,16 @@ export default withApiAuthRequired (async function handler(req, res) {
         }, {
           role: 'user',
           content: `
-            Generate me a long and detailed SEO friendly article with proper headings and lists ordered or otherwise where needed of the following topic delimited by triple hyphens:
+            Generate a blog post ready for publishing on the following topic delimited by triple hyphens:
             ---
             ${topic}
             ---
-            Targeting the following comma separated keywords delimited by triple hyphens:
+            Your output should incorporate for SEO optimization the following provided list of keywords delimited by triple hyphens:
             ---
             ${keywords}
             ---
+            The blog post should include proper headings, subheadings, and any necessary lists or bullet points for clarity. 
+            Aim for a comprehensive and informative piece that will captivate readers and enhance search engine visibility.
           `
         },
       ],
