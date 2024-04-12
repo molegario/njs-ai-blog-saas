@@ -23,7 +23,7 @@ export default function TokenTopup() {
 
   return <div className="w-full h-full flex flex-col overflow-auto">
     <div className="m-auto max-w-screen-sm text-center">
-      <FontAwesomeIcon icon={faCoins} className="text-stone-600 text-8xl animate-ping" />
+      <FontAwesomeIcon icon={faCoins} className="text-stone-600 text-8xl motion-safe:animate-ping" />
       <h1>Token top-up?</h1>
       <h3 className="text-yellow-500">Need content? Got writer's block? Need inspiration.  Blood from stone?</h3>
       <p>For $9.00 CAD we'll give you 10 tokens.</p>
