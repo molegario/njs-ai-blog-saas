@@ -17,9 +17,5 @@ export default function Home() {
       <Link href='/post/new' className='btn'><span>Begin</span></Link>
     </div>
 
-
-
-
-
   </div>;
 }

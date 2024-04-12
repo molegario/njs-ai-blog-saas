@@ -1,6 +1,10 @@
 import { Comfortaa, Archivo_Black } from '@next/font/google'
 import '../styles/globals.css'
 import { UserProvider } from '@auth0/nextjs-auth0/client'
+import '@fortawesome/fontawesome-svg-core/styles.css';
+import {config} from '@fortawesome/fontawesome-svg-core';
+
+config.autoAddCss = false;
 
 const dmSans = Comfortaa({
   weight: ['400', '500', '700'],

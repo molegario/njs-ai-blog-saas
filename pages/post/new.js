@@ -2,73 +2,100 @@ import { withPageAuthRequired } from "@auth0/nextjs-auth0";
 import AppLayout from "../../components/app-layout/AppLayout";
 import { useState } from "react";
 import Markdown from 'react-markdown';
+import { useRouter } from "next/router";
+import { getAppProps } from "../../utils/db-utils";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBrain, faCentSign, faHashtag, faQuestion } from "@fortawesome/free-solid-svg-icons";
 
 export default function NewPost({}) {
-  // console.log('test::', test)
+  const router = useRouter();
   const [topic, setTopic] = useState('');
   const [keywords, setKeywords] = useState('');
+  const [generating, setGenerating] = useState();
 
-  const [postContent, setPostContent] = useState();
+
+
+
 
   async function generateSubmitHandler(evt) {
     evt.preventDefault();
-    // console.log('click handler')
+    setGenerating(true);
 
-    const resp = await fetch('/api/generatePost', {
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      method: 'POST',
-      body: JSON.stringify({
-        topic,
-        keywords
-      })
-    });
-    const json = await resp.json();
-    
-    // console.log("RESULT::", json);
-    setPostContent(json.post.postcontent);
+    try{
+      const resp = await fetch('/api/generatePost', {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          topic,
+          keywords
+        })
+      });
+      const json = await resp.json();
+  
+      if(json?.postid) {
+        router.push(`/post/${json.postid}`);
+      }
+  
+    } catch(e) {
+      setGenerating(false);
+    }
   }
 
   return <div 
-    className="px-2 max-w-3xl"
+    className="h-full overflow-hidden"
   >
-    <form 
-      onSubmit={generateSubmitHandler}
-    >
-      <div>
-        <label htmlFor="topic">
-          <strong>
-            Generate a blog post on the topic of:
-          </strong>
-        </label>
-        <textarea 
-          id="topic"
-          className="resize-none border border-slate-500 w-full block my-2 px-4 py-2 round-sm"
-          value={topic} 
-          onChange={e => setTopic(e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="keywords">
-          <strong>
-            Targetting the following keywords:
-          </strong>
-        </label>
-        <textarea
-          id="keywords"
-          className="resize-none border border-slate-500 w-full block my-2 px-4 py-2 round-sm" 
-          value={keywords} 
-          onChange={e => setKeywords(e.target.value)} 
-        />
-      </div>
-      <button type="submit" className="btn">Generate</button>
-    </form>
+    {
+      generating && (
+        <div className="text-green-500 flex h-full animate-pulse w-full flex-col justify-center items-center">
+          <FontAwesomeIcon icon={faBrain} className="text-8xl"/>
+          <h6>Generating...</h6>
+        </div>  
+      )
+    }
+    {
+      !generating && (
+        <div className="w-full h-full flex flex-col overflow-auto">
+          <form 
+            onSubmit={generateSubmitHandler} className="m-auto w-full max-w-screen-sm bg-slate-100 p-4 rounded-md shadow-xl border border-slate-200 shadow-slate-200"
+          >
+            <div className="mb-4">
+              <label htmlFor="topic">
+                <strong>
+                  Generate a blog post on the topic of:
+                </strong>
+              </label>
+              <textarea 
+                id="topic"
+                className="resize-none border border-slate-500 w-full block mt-1 mb-1 px-4 py-2 round-sm"
+                value={topic} 
+                onChange={e => setTopic(e.target.value)}
+              />
+            </div>
+            <div>
+              <label htmlFor="keywords">
+                <strong>
+                  Targetting the following keywords:
+                </strong>
+              </label>
+              <textarea
+                id="keywords"
+                className="resize-none border border-slate-500 w-full block mt-1 mb-1 px-4 py-2 round-sm" 
+                value={keywords} 
+                onChange={e => setKeywords(e.target.value)} 
+              />
+              <small className="block mb-2">
+                Separate keywords with a comma
+              </small>
+            </div>
+            <button type="submit" className="btn">Generate</button>
+          </form>
+        </div>
+      )
+    }
 
-    <Markdown>
-      {postContent}
-    </Markdown>
   </div>
 }
 
@@ -76,11 +103,13 @@ NewPost.getLayout = function getLayout(page, pageProps) {
   return <AppLayout {...pageProps}>{page}</AppLayout>
 }
 
-export const getServerSideProps = withPageAuthRequired(
-  () => {
-
+export const getServerSideProps = withPageAuthRequired({
+  async getServerSideProps(ctx) {
+    const appsideprops = await getAppProps(ctx);
     return {
-      props: {}
+      props: {
+        ...appsideprops
+      }
     }  
   }
-);
+});
