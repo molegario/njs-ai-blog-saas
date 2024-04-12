@@ -50,22 +50,25 @@ export default function Post({
   };
 
   const handleDelete = async () => {
-    const respDelete = await fetch('/api/deletePost', {
-      method: "POST",
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        postid: currentpostid
-      })
-    });
-
-    const jsonDelete = await respDelete.json();
-
-    if(jsonDelete.success) {
-      removeDeletedPostFromTracked(currentpostid)
-      router.push('/post/new');
+    try{
+      const respDelete = await fetch('/api/deletePost', {
+        method: "POST",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          postid: currentpostid
+        })
+      });
+  
+      const jsonDelete = await respDelete.json();
+      if(jsonDelete.success) {
+        removeDeletedPostFromTracked(currentpostid)
+        router.replace('/post/new');
+      }
+    } catch(e) {
+      console.error(e.message || 'failed to delete this post.')
     }
   };
 

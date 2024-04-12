@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useReducer, useState } from 'react';
 const PostsContext = React.createContext({});
 
 export default PostsContext;
@@ -16,26 +16,39 @@ function compareDates(a,b) {
   }
 }
 
+function postsReducer(state, action) {
+  switch(action.type) {
+    case 'addPosts': {
+      const updated = [...state];
+      action.posts.forEach(
+        ssr=>{
+          if(
+            !state.map(ttt=>ttt._id).includes(ssr._id)
+          ) {
+            updated.push(ssr);
+          }
+        }
+      );
+      return updated.sort(compareDates);
+    }
+    case 'deletePost': {
+      return state.filter(xx=>xx._id!==action.postid);
+    }
+    default:
+      return state;
+  }
+}
+
 export const PostsContextProvider = ({children}) => {
-  const [posts, setPosts] = useState([]);
+  const [posts, dispatch] = useReducer(postsReducer, []);
   const [nomoreposts, setNomoreposts] = useState(false)
 
   //for init only
   const setPostsFromSSR = useCallback(
     (postsFromSSR = []) => {
-      setPosts(prev=>{
-        const updated = [...prev];
-        postsFromSSR.forEach(
-          ssr=>{
-            if(
-              !prev.map(ttt=>ttt._id).includes(ssr._id)
-            ) {
-              updated.push(ssr);
-            }
-          }
-        );
-
-        return updated.sort(compareDates);
+      dispatch({
+        type: "addPosts",
+        posts: postsFromSSR,
       });
     },
     []
@@ -43,14 +56,16 @@ export const PostsContextProvider = ({children}) => {
 
   const removeDeletedPostFromTracked = useCallback(
     (postid) => {
-      setPosts(prev=>prev.filter(xx=>xx._id!==postid))
+      dispatch({
+        type: "deletePost",
+        postid,
+      })
     },
-    [setPosts]
+    []
   );
 
   const getMorePosts = useCallback(
     async ({created:lastCreatedDate, isRefresh=false}={}) => {
-
       const nextPostsResp = await fetch('/api/getPosts', {
         method: "POST",
         headers: {
@@ -66,22 +81,15 @@ export const PostsContextProvider = ({children}) => {
 
       if(nextPostsJson?.posts.length > 0) {
         setNomoreposts(false);
-        setPosts(prev=>{
-          const updatedPosts = [
-            ...prev
-          ];
-          nextPostsJson.posts.forEach(post => {
-            if(!prev.map(uu=>uu._id).includes(post._id)) {
-              updatedPosts.push(post)
-            }
-          });
-          return updatedPosts;
-        });  
+        dispatch({
+          type: "addPosts",
+          posts: nextPostsJson.posts
+        });
       } else {
         setNomoreposts(true);
       }
     },
-    [ setPosts ]
+    [ setNomoreposts ]
   );
 
   return <PostsContext.Provider value={{
