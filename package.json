@@ -28,6 +28,7 @@
     "stripe": "^11.8.0"
   },
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.5.4",
     "@types/react": "18.2.75",
     "autoprefixer": "^10.4.13",
     "eslint": "8.33.0",

@@ -11,6 +11,7 @@ import { getAppProps } from "../../utils/db-utils";
 import { useContext, useState } from "react";
 import { useRouter } from "next/router";
 import PostsContext from "../../context/posts-context";
+import {Image} from "next/image";
 
 export default function Post({
   postcontent,
@@ -44,8 +45,7 @@ export default function Post({
       return <SyntaxHighlighter 
           style={atomDark}
           language={language}
-          children={children}
-        />;
+        >{children}</SyntaxHighlighter>;
     },
   };
 

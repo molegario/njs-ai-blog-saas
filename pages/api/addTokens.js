@@ -8,34 +8,39 @@ export default async function handler(req, res) {
 
   if(req.method === 'POST') {
 
-    const {user} = await getSession(req, res);
+    try{
+      const { user } = await getSession(req, res);
 
-    const lineitems = [
-      {
-        price: process.env.STRIPE_PRODUCT_PRICE_ID,
-        quantity: 1,
-      }
-    ];
+      const lineitems = [
+        {
+          price: process.env.STRIPE_PRODUCT_PRICE_ID,
+          quantity: 1,
+        }
+      ];
 
-    const protocol = process.env.NODE_ENV === 'development' ? "http://" : "https://";
-    const host = req.headers.host;
+      const protocol = process.env.NODE_ENV === 'development' ? "http://" : "https://";
+      const host = req.headers.host;
 
-    const checkoutsession = await stripe.checkout.sessions.create({
-      line_items: lineitems,
-      mode: "payment",
-      success_url: `${protocol}${host}/success`,
-      payment_intent_data: {
+      const checkoutsession = await stripe.checkout.sessions.create({
+        line_items: lineitems,
+        mode: "payment",
+        success_url: `${protocol}${host}/success`,
+        payment_intent_data: {
+          metadata: {
+            sub: user.sub,
+          }
+        },
         metadata: {
           sub: user.sub,
         }
-      },
-      metadata: {
-        sub: user.sub,
-      }
-    });
+      });
 
-    res.status(200).json({ session: checkoutsession });
-    return;
+      res.status(200).json({ session: checkoutsession });
+      return;
+    } catch(e) {
+      res.status(500).json({ message: e.message || 'failed to complete transaction' });
+      return;
+    }
   }
 
   res.status(200).json({ name: 'no action was requested' });
